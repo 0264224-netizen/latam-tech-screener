@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LatAm Tech Deal Screener</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,wght@0,400;0,500;0,600;1,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --bg:#f5f3ee;
+    --surface:#ffffff;
+    --surface-2:#ece8de;
+    --border:#ddd7c8;
+    --border-strong:#c7bfab;
+    --ink:#1c2321;
+    --ink-soft:#5c645f;
+    --ink-faint:#8b9089;
+    --accent:#1f5c55;
+    --accent-strong:#153f3a;
+    --accent-soft:#dceae6;
+    --accent-contrast:#f7fbf9;
+    --good:#2f7d4f;
+    --good-soft:#e1efe3;
+    --warn:#a5750f;
+    --warn-soft:#f3e6ca;
+    --risk:#a3402b;
+    --risk-soft:#f2ddd5;
+    --shadow: 0 1px 2px rgba(28,35,33,.06), 0 8px 24px -12px rgba(28,35,33,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#111817;
+      --surface:#17201e;
+      --surface-2:#1e2a27;
+      --border:#2c3936;
+      --border-strong:#3c4b47;
+      --ink:#e8ede9;
+      --ink-soft:#a2ada6;
+      --ink-faint:#6f7a74;
+      --accent:#57c2b0;
+      --accent-strong:#8adcce;
+      --accent-soft:#1c3c37;
+      --accent-contrast:#0a1615;
+      --good:#57b47c;
+      --good-soft:#173523;
+      --warn:#d3a441;
+      --warn-soft:#3a2d13;
+      --risk:#df8267;
+      --risk-soft:#3c2219;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#111817;
+    --surface:#17201e;
+    --surface-2:#1e2a27;
+    --border:#2c3936;
+    --border-strong:#3c4b47;
+    --ink:#e8ede9;
+    --ink-soft:#a2ada6;
+    --ink-faint:#6f7a74;
+    --accent:#57c2b0;
+    --accent-strong:#8adcce;
+    --accent-soft:#1c3c37;
+    --accent-contrast:#0a1615;
+    --good:#57b47c;
+    --good-soft:#173523;
+    --warn:#d3a441;
+    --warn-soft:#3a2d13;
+    --risk:#df8267;
+    --risk-soft:#3c2219;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 28px -14px rgba(0,0,0,.6);
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Newsreader', Georgia, 'Times New Roman', serif;
+    font-weight:600;
+    letter-spacing:-.01em;
+    text-wrap:balance;
+    margin:0;
+    color:var(--ink);
+  }
+  .num{font-family:'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace; font-variant-numeric:tabular-nums;}
+  a{color:var(--accent-strong);}
+  :root[data-theme="dark"] a, @media (prefers-color-scheme: dark){ a{color:var(--accent-strong);} }
+
+  .wrap{max-width:1180px; margin:0 auto; padding:28px 24px 80px;}
+
+  /* ---------- Brand bar ---------- */
+  .brandbar{
+    display:flex; align-items:center; gap:11px;
+    padding-bottom:16px; margin-bottom:18px; border-bottom:1px solid var(--border);
+  }
+  .brand-mark{
+    width:26px; height:26px; border-radius:6px; background:var(--ink); color:var(--bg);
+    display:flex; align-items:center; justify-content:center; flex:none;
+    font-family:'Newsreader', serif; font-style:italic; font-weight:600; font-size:15px;
+  }
+  .brand-name{
+    font-family:'IBM Plex Mono', monospace; text-transform:uppercase; letter-spacing:.15em;
+    font-size:11px; color:var(--ink-soft);
+  }
+  .brand-name span{color:var(--ink-faint); text-transform:none; letter-spacing:0; margin-left:8px;}
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    display:flex; justify-content:space-between; align-items:flex-end; gap:24px;
+    flex-wrap:wrap;
+    padding-bottom:20px; margin-bottom:24px;
+    border-bottom:2px solid var(--ink);
+  }
+  .masthead .eyebrow{
+    font-family:'IBM Plex Mono', monospace; font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--accent-strong); margin-bottom:8px; display:block;
+  }
+  .masthead h1{font-size:clamp(28px,4vw,38px); max-width:20ch;}
+  .masthead .sub{color:var(--ink-soft); font-size:14.5px; max-width:52ch; margin-top:8px;}
+  .masthead-meta{
+    display:flex; flex-direction:column; align-items:flex-end; gap:6px; font-size:12.5px; color:var(--ink-soft);
+    font-family:'IBM Plex Mono', monospace;
+  }
+  .asof-tag{
+    background:var(--accent-soft); color:var(--accent-strong); border:1px solid var(--border-strong);
+    padding:4px 10px; border-radius:100px; font-size:11.5px; letter-spacing:.02em;
+  }
+
+  /* ---------- Summary stat strip ---------- */
+  .stats{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+    background:var(--border); border:1px solid var(--border); border-radius:10px; overflow:hidden;
+    margin-bottom:28px;
+  }
+  .stat{background:var(--surface); padding:14px 18px;}
+  .stat .label{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-faint);}
+  .stat .value{font-family:'IBM Plex Mono',monospace; font-size:22px; font-weight:600; margin-top:4px;}
+  .stat .value small{font-size:13px; font-weight:500; color:var(--ink-soft);}
+
+  /* ---------- Controls ---------- */
+  .panel{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    box-shadow:var(--shadow); margin-bottom:20px;
+  }
+  .controls{padding:18px 20px; display:flex; flex-direction:column; gap:16px;}
+  .controls-row{display:flex; gap:14px; flex-wrap:wrap; align-items:center;}
+  .search-input{
+    flex:1 1 220px; min-width:180px;
+    padding:9px 12px; border:1px solid var(--border-strong); border-radius:8px;
+    background:var(--bg); color:var(--ink); font-size:13.5px; font-family:inherit;
+  }
+  .search-input:focus-visible, button:focus-visible, input:focus-visible, summary:focus-visible{
+    outline:2px solid var(--accent); outline-offset:2px;
+  }
+  .chipgroup{display:flex; gap:6px; flex-wrap:wrap;}
+  .chip{
+    font-size:12.5px; padding:5px 11px; border-radius:100px; border:1px solid var(--border-strong);
+    background:var(--surface); color:var(--ink-soft); cursor:pointer; white-space:nowrap;
+    transition:background .12s, color .12s, border-color .12s;
+  }
+  .chip:hover{border-color:var(--accent);}
+  .chip.active{background:var(--accent); border-color:var(--accent); color:var(--accent-contrast); font-weight:500;}
+  .field-label{font-size:11px; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-faint); margin-bottom:6px; display:block;}
+  .range-field{flex:1 1 200px; min-width:170px;}
+  .range-field output{font-family:'IBM Plex Mono',monospace; color:var(--accent-strong); font-weight:600;}
+  input[type="range"]{width:100%; accent-color:var(--accent); height:4px;}
+  .reset-btn{
+    font-size:12.5px; padding:7px 14px; border-radius:8px; border:1px solid var(--border-strong);
+    background:var(--surface-2); color:var(--ink); cursor:pointer; font-family:inherit;
+  }
+  .reset-btn:hover{border-color:var(--accent); color:var(--accent-strong);}
+
+  details.weights{border-top:1px solid var(--border);}
+  details.weights summary{
+    list-style:none; cursor:pointer; padding:12px 20px; font-size:13px; font-weight:500;
+    display:flex; align-items:center; gap:8px; color:var(--ink);
+  }
+  details.weights summary::-webkit-details-marker{display:none;}
+  details.weights summary .arrow{transition:transform .15s; color:var(--ink-faint);}
+  details.weights[open] summary .arrow{transform:rotate(90deg);}
+  .weights-body{padding:4px 20px 18px; display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:16px 22px;}
+  .weight-row .field-label{display:flex; justify-content:space-between; margin-bottom:4px;}
+
+  /* ---------- Table ---------- */
+  .table-scroll{overflow-x:auto;}
+  table{width:100%; border-collapse:collapse; min-width:920px;}
+  thead th{
+    position:sticky; top:0; background:var(--surface-2); z-index:1;
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft);
+    padding:11px 14px; border-bottom:1px solid var(--border-strong); cursor:pointer; white-space:nowrap;
+    font-weight:600;
+  }
+  thead th:hover{color:var(--accent-strong);}
+  thead th.sorted::after{content:" " attr(data-arrow); color:var(--accent);}
+  thead th.num-col, td.num-col{text-align:right;}
+  tbody tr.row{border-bottom:1px solid var(--border); cursor:pointer;}
+  tbody tr.row:hover{background:var(--surface-2);}
+  tbody tr.row.open{background:var(--accent-soft);}
+  td{padding:12px 14px; font-size:13.5px; vertical-align:middle;}
+  .company-name{font-weight:600; color:var(--ink);}
+  .ticker-line{font-size:11.5px; color:var(--ink-faint); font-family:'IBM Plex Mono',monospace; margin-top:2px;}
+  .tag{
+    display:inline-block; font-size:11px; padding:2px 8px; border-radius:100px;
+    background:var(--surface-2); color:var(--ink-soft); border:1px solid var(--border);
+  }
+  .na{color:var(--ink-faint); font-style:italic;}
+
+  .score-cell{display:flex; align-items:center; gap:9px; justify-content:flex-end;}
+  .score-num{font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:14px; width:2.4em; text-align:right;}
+  .score-bar{width:64px; height:7px; border-radius:100px; background:var(--surface-2); overflow:hidden; border:1px solid var(--border);}
+  .score-bar > span{display:block; height:100%; border-radius:100px;}
+  .band-good{color:var(--good);} .band-good .score-bar>span{background:var(--good);}
+  .band-warn{color:var(--warn);} .band-warn .score-bar>span{background:var(--warn);}
+  .band-risk{color:var(--risk);} .band-risk .score-bar>span{background:var(--risk);}
+
+  .incomplete-dot{
+    display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--warn);
+    margin-left:5px; vertical-align:middle;
+  }
+
+  tr.detail-row td{padding:0; border-bottom:1px solid var(--border);}
+  .detail{
+    background:var(--surface); padding:20px 22px 22px; display:grid;
+    grid-template-columns:1.3fr 1fr; gap:26px;
+  }
+  @media (max-width:760px){ .detail{grid-template-columns:1fr;} }
+  .detail h3{font-size:16px; margin-bottom:2px;}
+  .detail .detail-sub{color:var(--ink-soft); font-size:12.5px; margin-bottom:14px;}
+  .metric-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:10px 20px;}
+  .metric-grid .m-label{font-size:11px; text-transform:uppercase; color:var(--ink-faint); letter-spacing:.05em;}
+  .metric-grid .m-value{font-family:'IBM Plex Mono',monospace; font-size:15px; font-weight:600; margin-top:2px;}
+  .detail-note{margin-top:14px; font-size:12px; color:var(--ink-soft); border-left:2px solid var(--warn); padding-left:10px;}
+  .detail-source{margin-top:10px; font-size:12px;}
+
+  .overlay-block{background:var(--surface-2); border:1px solid var(--border); border-radius:10px; padding:16px 18px;}
+  .overlay-block h4{font-size:12.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); margin:0 0 12px; font-weight:600; font-family:'IBM Plex Sans';}
+  .slider-row{margin-bottom:14px;}
+  .slider-row:last-of-type{margin-bottom:0;}
+  .slider-row .field-label{display:flex; justify-content:space-between;}
+  textarea.notes{
+    width:100%; margin-top:12px; min-height:60px; resize:vertical; font-family:inherit; font-size:12.5px;
+    padding:8px 10px; border:1px solid var(--border-strong); border-radius:8px; background:var(--bg); color:var(--ink);
+  }
+
+  /* ---------- Methodology ---------- */
+  details.methodology{margin-top:26px;}
+  details.methodology summary{
+    cursor:pointer; font-size:13.5px; font-weight:500; color:var(--accent-strong);
+    padding:10px 0; list-style:none; display:flex; align-items:center; gap:8px;
+  }
+  details.methodology summary::-webkit-details-marker{display:none;}
+  details.methodology summary .arrow{transition:transform .15s;}
+  details.methodology[open] summary .arrow{transform:rotate(90deg);}
+  .methodology-body{font-size:13px; color:var(--ink-soft); max-width:74ch; padding-bottom:8px;}
+  .methodology-body p{margin:0 0 10px;}
+  .methodology-body ul{margin:0 0 10px; padding-left:20px;}
+  .methodology-body li{margin-bottom:5px;}
+  .sources-list{font-family:'IBM Plex Mono',monospace; font-size:11.5px; line-height:1.9; color:var(--ink-faint);}
+  .sources-list a{color:var(--ink-soft);}
+
+  footer.page-footer{margin-top:34px; padding-top:16px; border-top:1px solid var(--border); font-size:11.5px; color:var(--ink-faint);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="brandbar">
+    <div class="brand-mark">D</div>
+    <div class="brand-name">Diaz Capital Partners<span>Deal Origination &amp; Screening</span></div>
+  </div>
+
+  <div class="masthead">
+    <div>
+      <span class="eyebrow">Herramienta de screening &middot; Compra-venta de empresas</span>
+      <h1>LatAm Tech Deal Screener</h1>
+      <p class="sub">Universo inicial: 10 empresas públicas de tecnología / software con presencia en México y Latinoamérica. Filtra, pondera y anota tu propia lectura estratégica sobre cada candidato.</p>
+    </div>
+    <div class="masthead-meta">
+      <span class="asof-tag">Datos de mercado al 4&ndash;6 sep 2026</span>
+      <span id="fxNote">Conversión BRL&rarr;USD @ 5.13</span>
+    </div>
+  </div>
+
+  <div class="stats" id="statsStrip"></div>
+
+  <div class="panel">
+    <div class="controls">
+      <div class="controls-row">
+        <input type="text" id="searchInput" class="search-input" placeholder="Buscar por empresa o ticker&hellip;" autocomplete="off">
+        <button class="reset-btn" id="resetBtn" type="button">Restablecer filtros</button>
+      </div>
+
+      <div class="controls-row">
+        <div>
+          <span class="field-label">Sub-sector</span>
+          <div class="chipgroup" id="sectorChips"></div>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <div>
+          <span class="field-label">Tamaño (cap. de mercado)</span>
+          <div class="chipgroup" id="sizeChips"></div>
+        </div>
+        <div>
+          <span class="field-label">País</span>
+          <div class="chipgroup" id="countryChips"></div>
+        </div>
+      </div>
+
+      <div class="controls-row">
+        <div class="range-field">
+          <span class="field-label">Crecimiento mínimo (YoY) <output id="growthOut">0%</output></span>
+          <input type="range" id="growthMin" min="-10" max="50" step="1" value="-10">
+        </div>
+        <div class="range-field">
+          <span class="field-label">EV/EBITDA máximo <output id="evOut">30x</output></span>
+          <input type="range" id="evMax" min="0" max="30" step="0.5" value="30">
+        </div>
+      </div>
+    </div>
+
+    <details class="weights" id="weightsPanel">
+      <summary><span class="arrow">&#9656;</span> Ajustar ponderación del score compuesto</summary>
+      <div class="weights-body">
+        <div class="weight-row">
+          <span class="field-label"><span>Crecimiento de ingresos</span><output id="wGrowthOut">25%</output></span>
+          <input type="range" id="wGrowth" min="0" max="100" value="25">
+        </div>
+        <div class="weight-row">
+          <span class="field-label"><span>Rentabilidad (margen neto)</span><output id="wMarginOut">20%</output></span>
+          <input type="range" id="wMargin" min="0" max="100" value="20">
+        </div>
+        <div class="weight-row">
+          <span class="field-label"><span>Valuación (EV/EBITDA, invertido)</span><output id="wValOut">25%</output></span>
+          <input type="range" id="wVal" min="0" max="100" value="25">
+        </div>
+        <div class="weight-row">
+          <span class="field-label"><span>Fit estratégico (manual)</span><output id="wFitOut">20%</output></span>
+          <input type="range" id="wFit" min="0" max="100" value="20">
+        </div>
+        <div class="weight-row">
+          <span class="field-label"><span>Riesgo / complejidad (manual, invertido)</span><output id="wRiskOut">10%</output></span>
+          <input type="range" id="wRisk" min="0" max="100" value="10">
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <div class="panel">
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr id="theadRow"></tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </div>
+  <p style="font-size:12px;color:var(--ink-faint);margin-top:8px;">Haz clic en una fila para ver el detalle completo y capturar tu evaluación de fit estratégico y riesgo.</p>
+
+  <details class="methodology">
+    <summary><span class="arrow">&#9656;</span> Metodología y fuentes</summary>
+    <div class="methodology-body">
+      <p><strong>Qué es:</strong> un screener cuantitativo de M&amp;A para el universo de empresas públicas de tecnología/software con exposición a México y Latinoamérica. Combina datos financieros de mercado con una capa de evaluación manual (fit estratégico y riesgo) que tú completas por candidato &mdash; así funciona un screening real: filtro cuantitativo primero, juicio del equipo de deal después.</p>
+      <p><strong>Score compuesto (0&ndash;100):</strong> promedio ponderado de cinco factores normalizados dentro del universo mostrado:</p>
+      <ul>
+        <li><strong>Crecimiento:</strong> variación de ingresos interanual (TTM o último año fiscal reportado).</li>
+        <li><strong>Rentabilidad:</strong> margen neto reportado.</li>
+        <li><strong>Valuación:</strong> múltiplo EV/EBITDA, invertido (un múltiplo más bajo puntúa más alto &mdash; más "barato" como target).</li>
+        <li><strong>Fit estratégico:</strong> slider manual 1&ndash;5 que tú defines por empresa (encaje con tu tesis, sinergias, geografía).</li>
+        <li><strong>Riesgo / complejidad:</strong> slider manual 1&ndash;5, invertido (regulación, integración, disponibilidad del vendedor).</li>
+      </ul>
+      <p>Los pesos son ajustables arriba. Una celda marcada <span class="na">n/d</span> con punto ámbar indica dato no disponible en la fuente consultada; esa fila recibe un valor neutro (50) en ese factor hasta que la corrijas.</p>
+      <p><strong>Nota sobre fintechs:</strong> en empresas con carteras de crédito o anticipo de recibibles (Nu, StoneCo, PagBank), el Enterprise Value puede distorsionarse por caja y deuda operativa, por lo que EV/EBITDA y EV/Ventas son menos comparables 1:1 frente a software puro. Úsalos con cautela en esas filas.</p>
+      <p><strong>Persistencia:</strong> tus filtros, ponderaciones, notas y sliders de fit/riesgo se guardan en el navegador (localStorage) de este dispositivo, no se comparten con otros usuarios de este enlace.</p>
+      <p><strong>Fuentes de datos</strong> (capitalización, ingresos TTM, crecimiento, EV/EBITDA, EV/Ventas &mdash; consultadas 4&ndash;6 sep 2026):</p>
+      <div class="sources-list" id="sourcesList"></div>
+    </div>
+  </details>
+
+  <footer class="page-footer">
+    Diaz Capital Partners &mdash; herramienta interna de trabajo, no es asesoría de inversión. Verifica cifras contra los reportes trimestrales oficiales (10-K/20-F, ITR/DFP) antes de usarlas en un proceso de M&amp;A real. Las cifras de mercado cambian a diario.
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ---------------- Data ----------------
+  var companies = [
+    {
+      id:"globant", name:"Globant", ticker:"GLOB", exchange:"NYSE", country:"Argentina", sector:"IT Services / Software Engineering",
+      mcapUSD:1.69e9, revUSD:2.45e9, growth:-1.3, evEbitda:5.21, evSales:0.83, netMargin:4.6,
+      source:"https://stockanalysis.com/stocks/glob/"
+    },
+    {
+      id:"totvs", name:"TOTVS", ticker:"TOTS3", exchange:"B3", country:"Brasil", sector:"Enterprise Software (ERP)",
+      mcapUSD:3.91e9, revUSD:1.285e9, growth:17.4, evEbitda:14.19, evSales:3.25, netMargin:null,
+      source:"https://stockanalysis.com/quote/bvmf/TOTS3/",
+      note:"Margen neto no disponible en la fuente consultada; revisar ITR/DFP más reciente."
+    },
+    {
+      id:"nu", name:"Nu Holdings", ticker:"NU", exchange:"NYSE", country:"Brasil", sector:"Fintech / Digital Banking",
+      mcapUSD:74.25e9, revUSD:8.44e9, growth:44.3, evEbitda:null, evSales:null, netMargin:42.8,
+      source:"https://stockanalysis.com/stocks/nu/",
+      note:"EV/EBITDA y EV/Ventas no disponibles en la fuente; cap. de mercado de $74B hace improbable un rol de target (más bien comprador potencial)."
+    },
+    {
+      id:"vtex", name:"VTEX", ticker:"VTEX", exchange:"NYSE", country:"Brasil", sector:"SaaS / E-commerce Platform",
+      mcapUSD:0.597e9, revUSD:0.2527e9, growth:9.6, evEbitda:12.58, evSales:1.69, netMargin:12.0,
+      source:"https://stockanalysis.com/stocks/vtex/"
+    },
+    {
+      id:"stoneco", name:"StoneCo", ticker:"STNE", exchange:"NASDAQ", country:"Brasil", sector:"Fintech / Payments",
+      mcapUSD:2.33e9, revUSD:2.62e9, growth:8.0, evEbitda:3.10, evSales:1.55, netMargin:24.7,
+      source:"https://stockanalysis.com/stocks/stne/",
+      note:"EV distorsionado por caja/anticipo de recibibles; comparar EV/EBITDA con cautela frente a software puro."
+    },
+    {
+      id:"pagbank", name:"PagBank (PagSeguro)", ticker:"PAGS", exchange:"NYSE", country:"Brasil", sector:"Fintech / Payments",
+      mcapUSD:2.68e9, revUSD:3.82e9, growth:2.6, evEbitda:1.54, evSales:0.72, netMargin:10.9,
+      source:"https://stockanalysis.com/stocks/pags/",
+      note:"EV distorsionado por caja/anticipo de recibibles; comparar EV/EBITDA con cautela frente a software puro."
+    },
+    {
+      id:"meli", name:"MercadoLibre", ticker:"MELI", exchange:"NASDAQ", country:"Uruguay", sector:"E-commerce & Fintech Platform",
+      mcapUSD:100.30e9, revUSD:35.18e9, growth:46.0, evEbitda:27.69, evSales:3.06, netMargin:5.3,
+      source:"https://stockanalysis.com/stocks/meli/",
+      note:"Cap. de mercado de $100B hace improbable un rol de target; inclúyela como referencia de valuación o comprador estratégico."
+    },
+    {
+      id:"afya", name:"Afya", ticker:"AFYA", exchange:"NASDAQ", country:"Brasil", sector:"EdTech",
+      mcapUSD:1.30e9, revUSD:0.7386e9, growth:7.9, evEbitda:5.90, evSales:2.30, netMargin:20.4,
+      source:"https://stockanalysis.com/stocks/afya/"
+    },
+    {
+      id:"locaweb", name:"Locaweb", ticker:"LWSA3", exchange:"B3", country:"Brasil", sector:"Cloud / Hosting SaaS",
+      mcapUSD:0.433e9, revUSD:0.2924e9, growth:7.4, evEbitda:null, evSales:1.26, netMargin:null,
+      source:"https://stockanalysis.com/quote/bvmf/LWSA3/",
+      note:"EV/EBITDA y margen neto GAAP no disponibles/negativos por cargos no operativos; la compañía reporta EBITDA ajustado ~25% de margen en su call de resultados. Verificar ITR."
+    },
+    {
+      id:"bemobi", name:"Bemobi", ticker:"BMOB3", exchange:"B3", country:"Brasil", sector:"Mobile SaaS / Digital Services",
+      mcapUSD:0.392e9, revUSD:0.3665e9, growth:19.2, evEbitda:null, evSales:null, netMargin:8.5,
+      source:"https://stockanalysis.com/quote/bvmf/BMOB3/",
+      note:"EV/EBITDA y EV/Ventas no disponibles en la fuente consultada."
+    }
+  ];
+
+  var sources = [
+    ["Globant (GLOB)","https://stockanalysis.com/stocks/glob/"],
+    ["TOTVS (TOTS3)","https://stockanalysis.com/quote/bvmf/TOTS3/"],
+    ["Nu Holdings (NU)","https://stockanalysis.com/stocks/nu/"],
+    ["VTEX (VTEX)","https://stockanalysis.com/stocks/vtex/"],
+    ["StoneCo (STNE)","https://stockanalysis.com/stocks/stne/"],
+    ["PagBank / PagSeguro (PAGS)","https://stockanalysis.com/stocks/pags/"],
+    ["MercadoLibre (MELI)","https://stockanalysis.com/stocks/meli/"],
+    ["Afya (AFYA)","https://stockanalysis.com/stocks/afya/"],
+    ["Locaweb (LWSA3)","https://stockanalysis.com/quote/bvmf/LWSA3/"],
+    ["Bemobi (BMOB3)","https://stockanalysis.com/quote/bvmf/BMOB3/"],
+    ["Tipo de cambio USD/BRL","https://tradingeconomics.com/brazil/currency"]
+  ];
+  var srcHtml = sources.map(function(s){ return '<div>'+s[0]+' &mdash; <a href="'+s[1]+'" target="_blank" rel="noopener">'+s[1]+'</a></div>'; }).join("");
+  document.getElementById("sourcesList").innerHTML = srcHtml;
+
+  // ---------------- Persistence ----------------
+  var STORE_KEY = "mna-screener-latam-v1";
+  var store = {};
+  try{
+    var raw = localStorage.getItem(STORE_KEY);
+    if(raw) store = JSON.parse(raw) || {};
+  }catch(e){ store = {}; }
+  function saveStore(){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){}
+  }
+  function getOverlay(id){
+    if(!store.overlay) store.overlay = {};
+    if(!store.overlay[id]) store.overlay[id] = {fit:3, risk:3, notes:""};
+    return store.overlay[id];
+  }
+
+  var weights = (store.weights) || {growth:25, margin:20, val:25, fit:20, risk:10};
+  var filters = (store.filters) || {q:"", sectors:[], sizes:[], countries:[], growthMin:-10, evMax:30};
+
+  function persist(){
+    store.weights = weights;
+    store.filters = filters;
+    saveStore();
+  }
+
+  // ---------------- Derived / normalization ----------------
+  function sizeBand(mcap){
+    if(mcap < 1e9) return "Small-cap (<$1B)";
+    if(mcap < 10e9) return "Mid-cap ($1-10B)";
+    return "Large-cap (>$10B)";
+  }
+  companies.forEach(function(c){ c.size = sizeBand(c.mcapUSD); });
+
+  function minMax(arr){
+    var vals = arr.filter(function(v){ return v!==null && v!==undefined && !isNaN(v); });
+    if(!vals.length) return {min:0,max:1};
+    return {min:Math.min.apply(null,vals), max:Math.max.apply(null,vals)};
+  }
+  var growthRange = minMax(companies.map(function(c){return c.growth;}));
+  var marginRange = minMax(companies.map(function(c){return c.netMargin;}));
+  var evRange = minMax(companies.map(function(c){return c.evEbitda;}));
+
+  function norm(v, range, invert){
+    if(v===null || v===undefined || isNaN(v)) return {score:50, incomplete:true};
+    var span = range.max - range.min;
+    var s = span === 0 ? 50 : ((v - range.min) / span) * 100;
+    if(invert) s = 100 - s;
+    return {score:Math.max(0,Math.min(100,s)), incomplete:false};
+  }
+
+  function computeScore(c){
+    var ov = getOverlay(c.id);
+    var g = norm(c.growth, growthRange, false);
+    var m = norm(c.netMargin, marginRange, false);
+    var v = norm(c.evEbitda, evRange, true);
+    var fitScore = ((ov.fit-1)/4)*100;
+    var riskScore = ((5-ov.risk)/4)*100;
+
+    var wSum = (weights.growth+weights.margin+weights.val+weights.fit+weights.risk) || 1;
+    var total = (g.score*weights.growth + m.score*weights.margin + v.score*weights.val + fitScore*weights.fit + riskScore*weights.risk) / wSum;
+
+    return {
+      total: total,
+      incomplete: g.incomplete || m.incomplete || v.incomplete,
+      parts:{growth:g.score, margin:m.score, val:v.score, fit:fitScore, risk:riskScore}
+    };
+  }
+
+  function band(score){
+    if(score>=70) return "good";
+    if(score>=50) return "warn";
+    return "risk";
+  }
+
+  // ---------------- Formatting ----------------
+  function fmtUSD(v){
+    if(v>=1e9) return "$"+(v/1e9).toFixed(v>=10e9?0:2)+"B";
+    return "$"+(v/1e6).toFixed(0)+"M";
+  }
+  function fmtPct(v){ return (v===null||v===undefined) ? null : (v>0?"+":"")+v.toFixed(1)+"%"; }
+  function fmtX(v){ return (v===null||v===undefined) ? null : v.toFixed(2)+"x"; }
+
+  // ---------------- Column config ----------------
+  var columns = [
+    {key:"rank", label:"#", sortable:false},
+    {key:"name", label:"Empresa", sortable:true},
+    {key:"sector", label:"Sub-sector", sortable:true},
+    {key:"country", label:"País", sortable:true},
+    {key:"mcapUSD", label:"Cap. mercado", sortable:true, num:true},
+    {key:"revUSD", label:"Ingresos TTM", sortable:true, num:true},
+    {key:"growth", label:"Crec. YoY", sortable:true, num:true},
+    {key:"evEbitda", label:"EV/EBITDA", sortable:true, num:true},
+    {key:"score", label:"Score", sortable:true, num:true}
+  ];
+  var sortState = {key:"score", dir:"desc"};
+
+  var theadRow = document.getElementById("theadRow");
+  columns.forEach(function(col){
+    var th = document.createElement("th");
+    th.textContent = col.label;
+    if(col.num) th.classList.add("num-col");
+    if(col.sortable){
+      th.addEventListener("click", function(){
+        if(sortState.key === col.key){ sortState.dir = sortState.dir==="asc"?"desc":"asc"; }
+        else { sortState.key = col.key; sortState.dir = col.key==="score"?"desc":"asc"; }
+        render();
+      });
+    }
+    theadRow.appendChild(th);
+  });
+
+  // ---------------- Filter UI ----------------
+  var allSectors = Array.from(new Set(companies.map(function(c){return c.sector;}))).sort();
+  var allCountries = Array.from(new Set(companies.map(function(c){return c.country;}))).sort();
+  var allSizes = ["Small-cap (<$1B)","Mid-cap ($1-10B)","Large-cap (>$10B)"];
+
+  function buildChips(container, values, stateArr, refreshFn){
+    container.innerHTML = "";
+    values.forEach(function(v){
+      var chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip" + (stateArr.indexOf(v)>-1 ? " active" : "");
+      chip.textContent = v;
+      chip.addEventListener("click", function(){
+        var idx = stateArr.indexOf(v);
+        if(idx>-1) stateArr.splice(idx,1); else stateArr.push(v);
+        persist();
+        refreshFn();
+        render();
+      });
+      container.appendChild(chip);
+    });
+  }
+  function refreshChips(){
+    buildChips(document.getElementById("sectorChips"), allSectors, filters.sectors, refreshChips);
+    buildChips(document.getElementById("sizeChips"), allSizes, filters.sizes, refreshChips);
+    buildChips(document.getElementById("countryChips"), allCountries, filters.countries, refreshChips);
+  }
+  refreshChips();
+
+  var searchInput = document.getElementById("searchInput");
+  searchInput.value = filters.q;
+  searchInput.addEventListener("input", function(){ filters.q = this.value; persist(); render(); });
+
+  var growthMinInput = document.getElementById("growthMin");
+  var growthOut = document.getElementById("growthOut");
+  growthMinInput.value = filters.growthMin;
+  growthOut.textContent = filters.growthMin+"%";
+  growthMinInput.addEventListener("input", function(){
+    filters.growthMin = parseFloat(this.value);
+    growthOut.textContent = filters.growthMin+"%";
+    persist(); render();
+  });
+
+  var evMaxInput = document.getElementById("evMax");
+  var evOut = document.getElementById("evOut");
+  evMaxInput.value = filters.evMax;
+  evOut.textContent = filters.evMax+"x";
+  evMaxInput.addEventListener("input", function(){
+    filters.evMax = parseFloat(this.value);
+    evOut.textContent = filters.evMax+"x";
+    persist(); render();
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", function(){
+    filters = {q:"", sectors:[], sizes:[], countries:[], growthMin:-10, evMax:30};
+    searchInput.value=""; growthMinInput.value=-10; growthOut.textContent="-10%";
+    evMaxInput.value=30; evOut.textContent="30x";
+    persist(); refreshChips(); render();
+  });
+
+  // ---------------- Weight sliders ----------------
+  function wireWeight(id, key, outId){
+    var el = document.getElementById(id), out = document.getElementById(outId);
+    el.value = weights[key];
+    out.textContent = weights[key]+"%";
+    el.addEventListener("input", function(){
+      weights[key] = parseInt(this.value,10);
+      out.textContent = weights[key]+"%";
+      persist(); render();
+    });
+  }
+  wireWeight("wGrowth","growth","wGrowthOut");
+  wireWeight("wMargin","margin","wMarginOut");
+  wireWeight("wVal","val","wValOut");
+  wireWeight("wFit","fit","wFitOut");
+  wireWeight("wRisk","risk","wRiskOut");
+
+  // ---------------- Row expand state ----------------
+  var openRow = null;
+
+  function buildDetailRow(c, score){
+    var ov = getOverlay(c.id);
+    var tr = document.createElement("tr");
+    tr.className = "detail-row";
+    var td = document.createElement("td");
+    td.colSpan = columns.length;
+
+    var netMarginTxt = c.netMargin===null ? '<span class="na">n/d</span>' : c.netMargin.toFixed(1)+"%";
+    var evSalesTxt = c.evSales===null ? '<span class="na">n/d</span>' : c.evSales.toFixed(2)+"x";
+    var evEbitdaTxt = c.evEbitda===null ? '<span class="na">n/d</span>' : c.evEbitda.toFixed(2)+"x";
+
+    td.innerHTML =
+      '<div class="detail">' +
+        '<div>' +
+          '<h3>'+c.name+' <span style="color:var(--ink-faint);font-weight:400;">&middot; '+c.ticker+'</span></h3>' +
+          '<div class="detail-sub">'+c.exchange+' &middot; '+c.country+' &middot; '+c.sector+' &middot; '+c.size+'</div>' +
+          '<div class="metric-grid">' +
+            '<div><div class="m-label">Capitalización de mercado</div><div class="m-value">'+fmtUSD(c.mcapUSD)+'</div></div>' +
+            '<div><div class="m-label">Ingresos (TTM)</div><div class="m-value">'+fmtUSD(c.revUSD)+'</div></div>' +
+            '<div><div class="m-label">Crecimiento YoY</div><div class="m-value">'+fmtPct(c.growth)+'</div></div>' +
+            '<div><div class="m-label">Margen neto</div><div class="m-value">'+netMarginTxt+'</div></div>' +
+            '<div><div class="m-label">EV / EBITDA</div><div class="m-value">'+evEbitdaTxt+'</div></div>' +
+            '<div><div class="m-label">EV / Ventas</div><div class="m-value">'+evSalesTxt+'</div></div>' +
+          '</div>' +
+          (c.note ? '<div class="detail-note">'+c.note+'</div>' : '') +
+          '<div class="detail-source">Fuente: <a href="'+c.source+'" target="_blank" rel="noopener">'+c.source+'</a></div>' +
+        '</div>' +
+        '<div class="overlay-block">' +
+          '<h4>Tu evaluación (se guarda en este navegador)</h4>' +
+          '<div class="slider-row">' +
+            '<span class="field-label"><span>Fit estratégico</span><output>'+ov.fit+' / 5</output></span>' +
+            '<input type="range" min="1" max="5" step="1" value="'+ov.fit+'" data-role="fit" data-id="'+c.id+'">' +
+          '</div>' +
+          '<div class="slider-row">' +
+            '<span class="field-label"><span>Riesgo / complejidad</span><output>'+ov.risk+' / 5</output></span>' +
+            '<input type="range" min="1" max="5" step="1" value="'+ov.risk+'" data-role="risk" data-id="'+c.id+'">' +
+          '</div>' +
+          '<textarea class="notes" placeholder="Notas del deal team&hellip; tesis, sinergias, riesgos, próximos pasos." data-role="notes" data-id="'+c.id+'">'+(ov.notes||"")+'</textarea>' +
+        '</div>' +
+      '</div>';
+
+    tr.appendChild(td);
+
+    td.querySelectorAll('input[type="range"][data-role]').forEach(function(inp){
+      inp.addEventListener("input", function(){
+        var id = this.getAttribute("data-id");
+        var role = this.getAttribute("data-role");
+        var ov2 = getOverlay(id);
+        ov2[role] = parseInt(this.value,10);
+        this.parentElement.querySelector("output").textContent = this.value+" / 5";
+        saveStore();
+        render(true);
+      });
+    });
+    td.querySelector('textarea[data-role="notes"]').addEventListener("input", function(){
+      var id = this.getAttribute("data-id");
+      getOverlay(id).notes = this.value;
+      saveStore();
+    });
+
+    return tr;
+  }
+
+  // ---------------- Render ----------------
+  var tbody = document.getElementById("tbody");
+
+  function applyFilters(list){
+    var q = filters.q.trim().toLowerCase();
+    return list.filter(function(c){
+      if(q && (c.name.toLowerCase().indexOf(q)===-1 && c.ticker.toLowerCase().indexOf(q)===-1)) return false;
+      if(filters.sectors.length && filters.sectors.indexOf(c.sector)===-1) return false;
+      if(filters.sizes.length && filters.sizes.indexOf(c.size)===-1) return false;
+      if(filters.countries.length && filters.countries.indexOf(c.country)===-1) return false;
+      if(c.growth < filters.growthMin) return false;
+      if(c.evEbitda !== null && c.evEbitda > filters.evMax) return false;
+      return true;
+    });
+  }
+
+  function render(keepOpen){
+    if(!keepOpen) { /* keep openRow as-is either way; only recompute */ }
+
+    var scored = companies.map(function(c){
+      var s = computeScore(c);
+      return {c:c, s:s};
+    });
+
+    var filtered = applyFilters(scored.map(function(x){return x.c;}));
+    var filteredScored = scored.filter(function(x){ return filtered.indexOf(x.c) > -1; });
+
+    filteredScored.sort(function(a,b){
+      var dir = sortState.dir==="asc" ? 1 : -1;
+      var av, bv;
+      if(sortState.key==="score"){ av=a.s.total; bv=b.s.total; }
+      else if(sortState.key==="name"){ av=a.c.name; bv=b.c.name; }
+      else if(sortState.key==="sector"){ av=a.c.sector; bv=b.c.sector; }
+      else if(sortState.key==="country"){ av=a.c.country; bv=b.c.country; }
+      else { av=a.c[sortState.key]; bv=b.c[sortState.key]; }
+      if(av===null||av===undefined) av = -Infinity;
+      if(bv===null||bv===undefined) bv = -Infinity;
+      if(typeof av === "string") return av.localeCompare(bv) * dir;
+      return (av-bv) * dir;
+    });
+
+    // sorted header indicator
+    Array.from(theadRow.children).forEach(function(th, i){
+      th.classList.remove("sorted");
+      th.removeAttribute("data-arrow");
+    });
+    var colIdx = columns.findIndex(function(c){return c.key===sortState.key;});
+    if(colIdx>-1){
+      theadRow.children[colIdx].classList.add("sorted");
+      theadRow.children[colIdx].setAttribute("data-arrow", sortState.dir==="asc"?"↑":"↓");
+    }
+
+    tbody.innerHTML = "";
+    filteredScored.forEach(function(item, idx){
+      var c = item.c, s = item.s;
+      var tr = document.createElement("tr");
+      tr.className = "row" + (openRow===c.id ? " open" : "");
+
+      var growthTxt = fmtPct(c.growth);
+      var evTxt = c.evEbitda===null ? '<span class="na">n/d</span><span class="incomplete-dot" title="Dato no disponible"></span>' : c.evEbitda.toFixed(2)+"x";
+      var bd = band(s.total);
+
+      tr.innerHTML =
+        '<td class="num">'+(idx+1)+'</td>' +
+        '<td><div class="company-name">'+c.name+'</div><div class="ticker-line">'+c.exchange+':'+c.ticker+'</div></td>' +
+        '<td><span class="tag">'+c.sector+'</span></td>' +
+        '<td>'+c.country+'</td>' +
+        '<td class="num-col num">'+fmtUSD(c.mcapUSD)+'</td>' +
+        '<td class="num-col num">'+fmtUSD(c.revUSD)+'</td>' +
+        '<td class="num-col num">'+growthTxt+'</td>' +
+        '<td class="num-col num">'+evTxt+'</td>' +
+        '<td class="num-col"><div class="score-cell band-'+bd+'"><div class="score-bar"><span style="width:'+Math.round(s.total)+'%"></span></div><span class="score-num">'+Math.round(s.total)+'</span></div></td>';
+
+      tr.addEventListener("click", function(){
+        openRow = (openRow === c.id) ? null : c.id;
+        render(true);
+      });
+      tbody.appendChild(tr);
+
+      if(openRow === c.id){
+        tbody.appendChild(buildDetailRow(c, s));
+      }
+    });
+
+    if(!filteredScored.length){
+      var trEmpty = document.createElement("tr");
+      var tdEmpty = document.createElement("td");
+      tdEmpty.colSpan = columns.length;
+      tdEmpty.style.padding = "28px 14px";
+      tdEmpty.style.textAlign = "center";
+      tdEmpty.style.color = "var(--ink-faint)";
+      tdEmpty.textContent = "Ningún candidato cumple estos filtros. Ajusta los criterios o restablece.";
+      trEmpty.appendChild(tdEmpty);
+      tbody.appendChild(trEmpty);
+    }
+
+    renderStats(filteredScored);
+  }
+
+  function renderStats(filteredScored){
+    var strip = document.getElementById("statsStrip");
+    var n = filteredScored.length;
+    var avgGrowth = n ? filteredScored.reduce(function(a,x){return a+(x.c.growth||0);},0)/n : 0;
+    var withEv = filteredScored.filter(function(x){return x.c.evEbitda!==null;});
+    var avgEv = withEv.length ? withEv.reduce(function(a,x){return a+x.c.evEbitda;},0)/withEv.length : null;
+    var avgScore = n ? filteredScored.reduce(function(a,x){return a+x.s.total;},0)/n : 0;
+    var totalMcap = filteredScored.reduce(function(a,x){return a+x.c.mcapUSD;},0);
+
+    strip.innerHTML =
+      '<div class="stat"><div class="label">Candidatos</div><div class="value">'+n+' <small>de '+companies.length+'</small></div></div>' +
+      '<div class="stat"><div class="label">Crecimiento prom. YoY</div><div class="value">'+(n?avgGrowth.toFixed(1):"0.0")+'%</div></div>' +
+      '<div class="stat"><div class="label">EV/EBITDA prom.</div><div class="value">'+(avgEv!==null?avgEv.toFixed(1)+"x":"n/d")+'</div></div>' +
+      '<div class="stat"><div class="label">Score prom.</div><div class="value">'+(n?Math.round(avgScore):"&mdash;")+' <small>/100</small></div></div>';
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
